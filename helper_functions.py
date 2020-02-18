@@ -84,7 +84,7 @@ def plot_ROC(y_true,y_proba,AUC,figsize = (7,5),color = 'darkturquoise',title='R
     plt.title(title);
 
 
-def model_fit_train_score_skf(model, X, y, kfold=5):
+def model_fit_train_score_skf(model, X, y, kfold=5,predict_proba = True):
     '''This function takes in three arguments:model (model object), X,y
     It will be splitted by stratified k fold algo
     The data will be fitted using the model passed in by the user
@@ -106,23 +106,27 @@ def model_fit_train_score_skf(model, X, y, kfold=5):
         model.fit(x_train, y_train)
         # calculate predictions
         y_pred = model.predict(x_val)
-        predictions = model.predict_proba(x_val)
+        if predict_proba:
+            predictions = model.predict_proba(x_val)
+            predict_prob.append(predictions[:, 1])
+            AUC.append(roc_auc_score(y_val, predictions[:, 1]))
         y_vals.append(y_val)
         predict.append(y_pred)
-        predict_prob.append(predictions[:, 1])
         Accuracy.append(accuracy_score(y_true=y_val, y_pred=y_pred))
         F1.append(f1_score(y_true=y_val, y_pred=y_pred))
-        AUC.append(roc_auc_score(y_val, predictions[:, 1]))
+
+
+    if predict_proba:
+        results_dict['predict_proba'] = predict_prob
+        results_dict['AUC_std'] = np.std(AUC)
+        results_dict['AUC_mean'] = np.mean(AUC)
 
     results_dict['y_val'] = y_vals
     results_dict['predictions'] = predict
-    results_dict['predict_proba'] = predict_prob
     results_dict['Accuracy_mean'] = np.mean(Accuracy)
     results_dict['F1_mean'] = np.mean(F1)
-    results_dict['AUC_mean'] = np.mean(AUC)
     results_dict['Accuracy_std'] = np.std(Accuracy)
     results_dict['F1_std'] = np.std(F1)
-    results_dict['AUC_std'] = np.std(AUC)
 
     return model, results_dict
 
