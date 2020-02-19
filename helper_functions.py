@@ -34,7 +34,7 @@ def model_fit_train_score(model, x_train, y_train, x_val, y_val):
     return model, results_dict
 
 
-def print_confusion_matrix(confusion_matrix, class_names, figsize=(10, 7), fontsize=10):
+def print_confusion_matrix(confusion_matrix, class_names,cmap='Greens', figsize=(10, 7), fontsize=10):
     """Prints a confusion matrix, as returned by sklearn.metrics.confusion_matrix, as a heatmap.
 
     Arguments
@@ -58,7 +58,7 @@ def print_confusion_matrix(confusion_matrix, class_names, figsize=(10, 7), fonts
     df_cm = pd.DataFrame(confusion_matrix, index=class_names, columns=class_names, )
     fig = plt.figure(figsize=figsize)
     try:
-        heatmap = sns.heatmap(df_cm, annot=True, fmt="d", cmap='Greens')
+        heatmap = sns.heatmap(df_cm, annot=True, fmt="d", cmap=cmap)
     except ValueError:
         raise ValueError("Confusion matrix values must be integers.")
     heatmap.yaxis.set_ticklabels(heatmap.yaxis.get_ticklabels(), rotation=0, ha='right', fontsize=fontsize)
@@ -150,3 +150,33 @@ def lemma_and_stop (text):
             lemma.append(None)
             lemma_and_stop.append(None)
     return lemma,lemma_and_stop
+
+def model_eval(model, X_train, y_train, X_test,y_test,predict_proba = True):
+    '''This function takes in three arguments:model (model object), X,y
+    It will be splitted by stratified k fold algo
+    The data will be fitted using the model passed in by the user
+    It returns the fitted model object and lists of Accuracy score as well as F1 score and AUC (area under curve)'''
+    results_dict = defaultdict()
+    
+    model.fit(X_train, y_train)
+    # calculate predictions
+    y_pred = model.predict(X_test)
+    
+    if predict_proba:
+        predictions = model.predict_proba(X_test)
+        predict_prob = predictions[:, 1]
+        AUC = roc_auc_score(y_test, predictions[:, 1])
+        
+    predict = y_test
+    Accuracy = accuracy_score(y_true=y_test, y_pred=y_pred)
+    F1 = f1_score(y_true=y_test, y_pred=y_pred)
+
+    if predict_proba:
+        results_dict['predict_proba'] = predict_prob
+        results_dict['AUC'] = AUC
+
+    results_dict['predictions'] = predict
+    results_dict['Accuracy'] = Accuracy
+    results_dict['F1'] = F1
+
+    return model, results_dict
