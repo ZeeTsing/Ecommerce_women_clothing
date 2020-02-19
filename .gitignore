@@ -5,3 +5,6 @@
 *.png
 *.pkl
 *.jpeg
+output/SVD.obj
+*.obj
+*.xlsx
