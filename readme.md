@@ -1,3 +1,5 @@
+# Sentiment analysis on e-commerce women clothing review
+
 This project aims to:
 * classify customers' sentiment as accurate as possible;
 * explore multiple ways of text mining and processing, including TF-IDF and text embedding with Word2Vec;
